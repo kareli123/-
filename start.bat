@@ -17,14 +17,16 @@ if errorlevel 1 (
 
 :: Install dependencies
 echo [1/5] Installing Python packages...
-pip install flask pyrogram tgcrypto curl_cffi
-python -c "import flask" >nul 2>&1
+pip install flask pyrogram requests
+echo.
+
+:: Verify
+python -c "import flask; import pyrogram; import requests; print('[OK] All packages installed')"
 if errorlevel 1 (
-    echo [ERROR] Flask did not install! Try: pip install flask
+    echo [ERROR] Packages failed to install
     pause
     exit /b 1
 )
-echo [OK] Packages installed
 
 :: Download cloudflared if not present
 if not exist cloudflared.exe (
@@ -33,6 +35,9 @@ if not exist cloudflared.exe (
 )
 if not exist cloudflared.exe (
     echo [ERROR] Failed to download cloudflared!
+    echo Download manually from:
+    echo https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe
+    echo and put cloudflared.exe in this folder
     pause
     exit /b 1
 )
@@ -43,37 +48,37 @@ echo [3/5] Starting web server on port 5000...
 start /b python app.py
 timeout /t 3 /nobreak >nul
 
-:: Start cloudflared and capture URL to file
+:: Start cloudflared and capture URL
 echo [4/5] Opening tunnel...
 del tunnel.log >nul 2>&1
+del tunnel_url.txt >nul 2>&1
 start /b cmd /c "cloudflared.exe tunnel --url http://localhost:5000 > tunnel.log 2>&1"
 
-echo Waiting for tunnel URL (may take 10-20 sec)...
+echo Waiting for tunnel URL (up to 30 sec)...
 set ATTEMPTS=0
 
 :wait_url
 timeout /t 3 /nobreak >nul
 set /a ATTEMPTS+=1
-if %ATTEMPTS% gtr 20 (
-    echo [ERROR] Tunnel failed to start. Check tunnel.log
+if %ATTEMPTS% gtr 10 (
+    echo [ERROR] Tunnel did not start. Check tunnel.log
+    type tunnel.log
     pause
     exit /b 1
 )
 
-:: Check if URL appeared in log
 powershell -Command "$c = Get-Content tunnel.log -ErrorAction SilentlyContinue; if ($c -match 'https://[a-z0-9-]+\.trycloudflare\.com') { $Matches[0] | Out-File -Encoding ascii tunnel_url.txt; exit 0 } else { exit 1 }" >nul 2>&1
 if errorlevel 1 goto wait_url
 
-:: Read URL
 set /p TUNNEL_URL=<tunnel_url.txt
 
 echo.
 echo ==========================================
-echo   YOUR PUBLIC URL: %TUNNEL_URL%
+echo   PUBLIC URL: %TUNNEL_URL%
 echo ==========================================
 echo.
 
-:: Start bot with tunnel URL
+:: Start bot
 echo [5/5] Starting Telegram bot...
 start /b python bot.py %TUNNEL_URL%
 
@@ -81,10 +86,9 @@ echo.
 echo [OK] Everything is running!
 echo.
 echo   Web: %TUNNEL_URL%
-echo   Bot: send /start to your bot in Telegram
+echo   Bot: send /start in Telegram
 echo.
 echo Close this window to stop everything.
-echo.
 pause >nul
 
 taskkill /f /im cloudflared.exe >nul 2>&1

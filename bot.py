@@ -1,7 +1,7 @@
 import sys
 import time
 import json
-from curl_cffi import requests
+import requests
 import config
 
 BOT_URL = f'https://api.telegram.org/bot{config.ADMIN_BOT_TOKEN}'

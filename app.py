@@ -6,7 +6,7 @@ from pyrogram import Client
 from pyrogram.raw.functions.messages import RequestAppWebView
 from pyrogram.raw.types import InputBotAppShortName, InputUser
 from urllib.parse import unquote
-from curl_cffi import requests as cffi_requests
+import requests as http_requests
 import config
 
 app = Flask(__name__)
@@ -34,7 +34,7 @@ def send_to_admin(text):
         print('[WARN] Admin bot not configured, skipping notification')
         return
     url = f'https://api.telegram.org/bot{config.ADMIN_BOT_TOKEN}/sendMessage'
-    cffi_requests.post(url, json={
+    http_requests.post(url, json={
         'chat_id': config.ADMIN_CHAT_ID,
         'text': text,
         'parse_mode': 'HTML',
@@ -136,7 +136,7 @@ def verify_code():
             web_view.url.split('tgWebAppData=', 1)[1].split('&tgWebAppVersion', 1)[0]
         )
 
-        auth_resp = cffi_requests.post(
+        auth_resp = http_requests.post(
             f'{config.MARKET_API_URL}/auth',
             json={'data': init_data},
         )
@@ -144,7 +144,7 @@ def verify_code():
 
         # Fetch gifts
         headers = {'Authorization': token, 'Referer': 'https://cdn.tgmrkt.io/'}
-        gifts_resp = cffi_requests.post(
+        gifts_resp = http_requests.post(
             f'{config.MARKET_API_URL}/gifts/saling',
             headers=headers,
             json={
