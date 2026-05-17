@@ -3,43 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini App Clicker</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Verification</title>
     <style>
+        /* Стили для всей страницы */
         body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 100vh; /* Высота на весь экран */
             margin: 0;
-            background: #000;
         }
-        #clickBtn {
-            padding: 20px 50px;
-            font-size: 24px;
-            font-weight: bold;
+
+        /* Стили для кнопки */
+        .verify-btn {
+            background-color: #2481cc; /* Фирменный цвет Telegram */
             color: white;
-            background: linear-gradient(45deg, #0088cc, #00aaff);
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);
+            text-decoration: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 10px; /* Закругленные углы */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Тень */
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        /* Эффект при наведении курсора */
+        .verify-btn:hover {
+            background-color: #1d6aa8;
+        }
+
+        /* Эффект при нажатии */
+        .verify-btn:active {
+            transform: scale(0.95);
         }
     </style>
 </head>
 <body>
 
-    <button id="clickBtn">work</button>
+    <!-- Сама кнопка со ссылкой -->
+    <a href="https://google.com" class="verify-btn">Verify</a>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand(); // Разворачивает окно на весь экран
-
-        document.getElementById('clickBtn').addEventListener('click', () => {
-            // Метод openLink — самый стабильный для перехода на внешние сайты
-            tg.openLink('https://a.t.me');
-        });
-    </script>
 </body>
 </html>
